@@ -1,0 +1,117 @@
+@use "./../../common_sass/index" as *
+    
+.add-video-main-container
+    display: flex
+    justify-content: space-between
+    flex-direction: column
+    align-items: center
+
+.video-log-title
+    width: 80vw
+
+    .video-title
+        font-weight: bold
+    
+    .video-title-input
+        width: 30vw
+        height: 5vh
+        padding: 5px
+        margin-left: 15px
+        border-radius: 10px
+        border-width: 1px
+
+
+.video-log-webcam
+    width: 80vw
+    height: 60vh
+    // border: 1px solid #eee
+    display: flex
+    justify-content: space-between
+    align-items: center
+
+    .webcam-media-container
+        width: 50vw
+        height: 55vh
+        border-right: 1px solid #eee
+
+        .pre-webcam-load 
+            width: 45vw
+            height: 50vh
+            display: flex
+            justify-content: center
+            align-items: center
+            flex-direction: column
+
+            button
+                @include secondary-btn
+
+                &:hover:enabled
+                    @include secondary-btn-hover
+
+                &:disabled
+                    @include btn-disabled            
+
+            p
+                width: 20vw
+                margin-top: 10px
+    
+
+        .webcam-media
+            width: 100%
+            height: 95%
+            min-width: 300px
+            // display: none
+
+
+    .webcam-media-controls
+        display: flex
+        flex-direction: column
+        width: 30vw
+        height: 55vh
+        align-items: center
+        justify-content: center 
+
+        .webcam-controls
+            @include secondary-btn
+            &:hover:enabled
+                @include secondary-btn-hover
+
+            &:nth-child(2)
+                margin: 20px 0px
+
+            &:disabled
+                @include btn-disabled
+
+.video-log-notes
+    width: 80vw
+    height: 20vh
+    display: flex
+    justify-content: space-between
+    align-items: center
+
+    .log-note-container
+        width: 50vw
+        height: 20vh
+        position: relative
+
+        .log-note-label
+            position: absolute
+            top: 25%
+
+        .log-note-textarea
+            margin-left: 50px
+            width: 40vw
+            height: 15vh
+            padding: 10px
+            border-radius: 10px
+            resize: none
+
+.log-upload-button
+    @include primary-btn
+
+    &:hover:enabled
+        @include primary-btn-hover
+
+    &:disabled
+        @include btn-disabled
+    

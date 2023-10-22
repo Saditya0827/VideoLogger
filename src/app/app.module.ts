@@ -3,10 +3,12 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { AddVideoLogComponent } from './component/add-video-log/add-video-log.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    AddVideoLogComponent
   ],
   imports: [
     BrowserModule,

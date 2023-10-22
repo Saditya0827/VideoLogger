@@ -1,0 +1,30 @@
+@use './variable' as *
+
+@mixin primary-btn()
+    width: 150px
+    padding: 10px
+    background-color: $nav-link-bg-color
+    color: $nav-link-text-color
+    border-radius: 5px
+    text-align: center
+
+
+@mixin primary-btn-hover()
+    background-color: $nav-link-hover-bg-color
+    color: $nav-link-hover-text-color
+
+    
+
+@mixin secondary-btn()
+    @include primary-btn
+    padding: 5px 10px
+
+    
+
+@mixin secondary-btn-hover()
+    @include primary-btn-hover
+
+
+@mixin btn-disabled()
+    background-color: $button-disabled-bg-color
+    color: $button-disabled-color
