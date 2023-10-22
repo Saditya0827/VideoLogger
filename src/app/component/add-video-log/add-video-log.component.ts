@@ -1,13 +1,17 @@
-import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, ViewChild, ElementRef, NgZone, ComponentFactoryResolver, OnDestroy } from '@angular/core';
+import { PreviewRecordingComponent } from '../preview-recording/preview-recording.component';
+import { ComponentPlaceholderDirective } from '../../directive/component-placeholder.directive';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-add-video-log',
   templateUrl: './add-video-log.component.html',
   styleUrls: ['./add-video-log.component.sass']
 })
-export class AddVideoLogComponent implements OnInit {
+export class AddVideoLogComponent implements OnDestroy {
 
   @ViewChild("webCamVideoElement") videoElement: ElementRef;
+  @ViewChild(ComponentPlaceholderDirective) componentPlaceholderDirective: ComponentPlaceholderDirective;
 
   isRecordingBtnDisabled: boolean = true;
   isPreviewReordingBtnDisabled: boolean = true;
@@ -15,6 +19,8 @@ export class AddVideoLogComponent implements OnInit {
   showPreWebcamTemplate: boolean = true;
   isResetBtnDisabled: boolean = true;
   recordingBtnText: string = "Start Recording";
+  showPreviewDialogBox: boolean = false;
+  previewCloseDialogSubscription: Subscription;
 
   mediaConfig = {
     audio: {
@@ -28,29 +34,33 @@ export class AddVideoLogComponent implements OnInit {
   mediaRecorder;
   // declare var MediaRecorder: any;
   chunk = [];
+  videoBlobObjectUrl: string;
 
 
-  constructor(private zone: NgZone) { }
+  constructor(private zone: NgZone,
+    private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  ngOnInit(): void {
-    // this.init();
+  ngOnDestroy(): void {
+    if (this.previewCloseDialogSubscription) {
+      this.previewCloseDialogSubscription.unsubscribe();
+    }
   }
 
   init() {
     let getMediaDevice = navigator?.mediaDevices;
-    let stream;
+    // let stream;
     let option = {
       mimeType: "video/webm"
     }
 
-    if(!(getMediaDevice)){
+    if (!(getMediaDevice)) {
       console.log("Media device is not supported in this browser");
     } else {
       getMediaDevice.getUserMedia(this.mediaConfig).then((stream) => {
         this.videoElement.nativeElement.srcObject = stream;
 
         this.mediaRecorder = new MediaRecorder(stream, option);
-        
+
         this.mediaRecorder.ondataavailable = (e) => this.getRecordingData(e);
 
         this.mediaRecorder.onstop = (e) => this.onMediaStopRecording(e);
@@ -60,10 +70,9 @@ export class AddVideoLogComponent implements OnInit {
     }
   }
 
-  getRecordingData (e) {
-    if(e.data?.size > 0){
+  getRecordingData(e) {
+    if (e.data?.size > 0) {
       this.chunk.push(e.data);
-      console.log("url", URL.createObjectURL(new Blob(this.chunk)));
     }
   }
 
@@ -76,50 +85,68 @@ export class AddVideoLogComponent implements OnInit {
       this.isResetBtnDisabled = false;
       this.isUploadBtnDisabled = false;
     });
-    
+
   }
 
   releaseMediaDevice() {
     let tracks = this.mediaRecorder?.stream?.getTracks() || [];
-    if(tracks.length > 0) {
-      tracks.forEach( track => {
+    if (tracks.length > 0) {
+      tracks.forEach(track => {
         track?.stop();
       });
     }
   }
 
 
-  startRecording(){
+  startRecording() {
     this.mediaRecorder.start();
   }
 
-  stopRecording(){
+  stopRecording() {
     this.mediaRecorder.stop();
   }
 
 
-  onOpenCameraClick(event: Event){
+  onOpenCameraClick(event: Event) {
     this.init();
     this.showPreWebcamTemplate = false;
     this.isRecordingBtnDisabled = false;
     this.isPreviewReordingBtnDisabled = true;
   }
 
-  onRecordingClick(buttonText: string){
-    if(buttonText === "Start Recording"){
+  onRecordingClick(buttonText: string) {
+    if (buttonText === "Start Recording") {
       this.recordingBtnText = "Stop Recording";
       this.startRecording();
     } else {
-      // this.recordingBtnText = "Start Recording";
       this.stopRecording();
     }
   }
 
-  onPreviewClick(event: Event){
-    // debugger;
+  onPreviewClick(event: Event) {
+    let videoBlobPreview: Blob;
+    videoBlobPreview = new Blob(this.chunk);
+    this.videoBlobObjectUrl = window.URL.createObjectURL(videoBlobPreview);
+
+    //Dynamic component load
+    const componentFactoryRef = this.componentFactoryResolver.resolveComponentFactory(PreviewRecordingComponent);
+    const componentPlaceholderRef = this.componentPlaceholderDirective.viewContainerRef;
+    componentPlaceholderRef.clear();
+
+    const componentPreviewDialogRef = componentPlaceholderRef.createComponent(componentFactoryRef);
+    componentPreviewDialogRef.instance.videoBlobUrl = this.videoBlobObjectUrl;
+
+    this.previewCloseDialogSubscription = componentPreviewDialogRef.instance.closeDialog.subscribe(data => {
+      this.previewCloseDialogSubscription.unsubscribe();
+      componentPlaceholderRef.clear();
+    });
   }
 
-  onResetClick(event: Event){
+  onPreviewDialogClose(event: Event) {
+    this.showPreviewDialogBox = !event;
+  }
+
+  onResetClick(event: Event) {
     this.isResetBtnDisabled = true;
     this.recordingBtnText = "Start Recording";
     this.isPreviewReordingBtnDisabled = true;
