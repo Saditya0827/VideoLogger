@@ -1,7 +1,7 @@
 <div class="add-video-main-container">
     <div class="video-log-title">
         <label for="video-title">Log title :</label>
-        <input type="text" name="videoTitle" id="video-title" class="video-title-input" required>
+        <input type="text" name="videoTitle" id="video-title" class="video-title-input" placeholder="Input log title here">
     </div>
     <div class="video-log-webcam">
         <div class="webcam-media-container">
@@ -25,3 +25,5 @@
         <button type="button" class="log-upload-button" [disabled]="isUploadBtnDisabled">Upload</button>
     </div>
 </div>
+<ng-template appComponentPlaceholder></ng-template>
+<!-- <app-preview-recording *ngIf="showPreviewDialogBox" [videoBlobUrl]="videoBlobObjectUrl" (closeDialog)="onPreviewDialogClose($event)"></app-preview-recording> -->

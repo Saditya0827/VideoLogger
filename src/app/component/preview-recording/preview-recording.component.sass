@@ -1,0 +1,69 @@
+@use "./../../common_sass/index" as *
+
+.back-drop
+    width: 100vw
+    height: 100vh
+    background-color: $dialog-backdrop-color
+    position: fixed
+    top: 0
+    left: 0
+    z-index: $dialog-backdrop-zindex
+
+.preview-rec-dialog
+    width: 50vw
+    height: 70vh
+    background-color: $dialog-bg-color
+    border-radius: 10px
+    position: fixed
+    top: 15vh
+    left: 25vw
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    border: $dialog-box-border
+    z-index: $dialog-box-zindex
+
+    .dialog-title
+        height: 5vh
+        width: 100%
+        padding: 5px
+        background-color: $dialog-title-bg-color
+        color: $dialog-title-text-color
+        border-bottom: 1px solid black
+
+        h2
+            font
+                size: 20px
+                weight: bolder
+            
+            text-align: center
+
+
+    .recording-playback-container
+        height: 55vh
+        width: 100%
+        padding: 10px
+        display: flex
+        justify-content: center
+
+        video
+            width: 70%
+            height: auto
+            
+
+    
+    .dialog-buttons-container
+        width: 100%
+        padding: 5px
+        display: flex
+        justify-content: space-evenly
+        border-top: 1px solid #bbb
+
+        .dialog-container
+            @include secondary-btn
+
+            &:hover
+                @include secondary-btn-hover
+
+                // &:disabled
+                //     @include btn-disabled  
