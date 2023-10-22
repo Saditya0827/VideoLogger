@@ -1,0 +1,27 @@
+<div class="add-video-main-container">
+    <div class="video-log-title">
+        <label for="video-title">Log title :</label>
+        <input type="text" name="videoTitle" id="video-title" class="video-title-input" required>
+    </div>
+    <div class="video-log-webcam">
+        <div class="webcam-media-container">
+            <div *ngIf="showPreWebcamTemplate" class="pre-webcam-load">
+                <button type="button" class="open-camera-btn" (click)="onOpenCameraClick($event)">Open WebCam</button>
+                <p class="media-permisson-instruction">Please allow access for "Camera" and "Microphone" to continue, if asked</p>
+            </div>
+            <video *ngIf="!showPreWebcamTemplate" playsinline autoplay muted class="webcam-media" #webCamVideoElement></video>
+        </div>
+        <div class="webcam-media-controls">
+            <button type="button" [disabled]="isRecordingBtnDisabled" class="webcam-controls" (click)="onRecordingClick(recordingBtnText)">{{recordingBtnText}}</button>
+            <button type="button" [disabled]="isPreviewReordingBtnDisabled" class="webcam-controls" (click)="onPreviewClick($event)">Preview Recording</button>
+            <button type="button" [disabled]="isResetBtnDisabled" class="webcam-controls" (click)="onResetClick($event)">Reset</button>
+        </div>
+    </div>
+    <div class="video-log-notes">
+        <div class="log-note-container">
+            <label class="log-note-label" for="log-notes">Note :</label>
+            <textarea name="logNotes" class="log-note-textarea" id="log-notes" cols="30" rows="5" placeholder="Write notes here, if any"></textarea>
+        </div>
+        <button type="button" class="log-upload-button" [disabled]="isUploadBtnDisabled">Upload</button>
+    </div>
+</div>
