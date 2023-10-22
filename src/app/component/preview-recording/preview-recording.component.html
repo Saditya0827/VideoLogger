@@ -1,0 +1,13 @@
+<div class="back-drop" (click)="onCloseBtnClick()"></div>
+<div class="preview-rec-dialog">
+    <div class="dialog-title">
+        <h2>Preview Recorded Video Logs</h2>
+    </div>
+    <div class="recording-playback-container">
+        <video [src]="getSanitizeUrl()" controls autoplay></video>
+    </div>
+    <div class="dialog-buttons-container">
+        <button type="button" class="dialog-container" (click)="onDownloadBtnClick()">Download</button>
+        <button type="button" class="dialog-container" (click)="onCloseBtnClick()">Close</button>
+    </div>
+</div>
