@@ -4,11 +4,11 @@
   </div>
   <nav class="app-navigation">
     <ul>
-      <li class="nav-link">
+      <li class="nav-link" [routerLink]="['/addLog']" routerLinkActive="nav-link-active">
         <!-- <span>icon</span> -->
         Add Video Log
       </li>
-      <li class="nav-link">
+      <li class="nav-link" [routerLink]="['/previousLog']" routerLinkActive="nav-link-active" >
         <!-- <span>icon</span> -->
         Previous Log
       </li>
@@ -16,7 +16,10 @@
   </nav>
 </header>
 <main class="page-container">
-  <app-add-video-log></app-add-video-log>
+  <router-outlet></router-outlet>
+  <!-- <app-add-video-log></app-add-video-log> -->
+  <!-- <app-previous-log></app-previous-log> -->
+<!-- <app-not-found></app-not-found> -->
 </main>
 <footer class="app-footer">
   <h3>Made By AKS</h3>

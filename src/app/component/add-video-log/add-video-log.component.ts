@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef, NgZone, ComponentFactoryResolver, OnD
 import { PreviewRecordingComponent } from '../preview-recording/preview-recording.component';
 import { ComponentPlaceholderDirective } from '../../directive/component-placeholder.directive';
 import { Subscription } from 'rxjs';
+import { MediaRecorderService } from 'src/app/service/media-recorder.service';
 
 @Component({
   selector: 'app-add-video-log',
@@ -21,94 +22,36 @@ export class AddVideoLogComponent implements OnDestroy {
   recordingBtnText: string = "Start Recording";
   showPreviewDialogBox: boolean = false;
   previewCloseDialogSubscription: Subscription;
+  updateViewOnStopRecordingSubscription: Subscription;
+  passStreamSubscription: Subscription;
 
-  mediaConfig = {
-    audio: {
-      echoCancellation: true
-    },
-    video: {
-      width: 500,
-      height: 350
-    }
-  };
-  mediaRecorder;
-  // declare var MediaRecorder: any;
-  chunk = [];
   videoBlobObjectUrl: string;
 
 
   constructor(private zone: NgZone,
-    private componentFactoryResolver: ComponentFactoryResolver) { }
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private mediaRecorderService: MediaRecorderService) { }
 
   ngOnDestroy(): void {
     if (this.previewCloseDialogSubscription) {
       this.previewCloseDialogSubscription.unsubscribe();
     }
-  }
-
-  init() {
-    let getMediaDevice = navigator?.mediaDevices;
-    // let stream;
-    let option = {
-      mimeType: "video/webm"
+    if (this.updateViewOnStopRecordingSubscription) {
+      this.updateViewOnStopRecordingSubscription.unsubscribe();
     }
-
-    if (!(getMediaDevice)) {
-      console.log("Media device is not supported in this browser");
-    } else {
-      getMediaDevice.getUserMedia(this.mediaConfig).then((stream) => {
-        this.videoElement.nativeElement.srcObject = stream;
-
-        this.mediaRecorder = new MediaRecorder(stream, option);
-
-        this.mediaRecorder.ondataavailable = (e) => this.getRecordingData(e);
-
-        this.mediaRecorder.onstop = (e) => this.onMediaStopRecording(e);
-      }).catch((error) => {
-        console.log("error from init function", error.toString());
-      });
+    if (this.passStreamSubscription) {
+      this.passStreamSubscription.unsubscribe();
     }
   }
-
-  getRecordingData(e) {
-    if (e.data?.size > 0) {
-      this.chunk.push(e.data);
-    }
-  }
-
-  onMediaStopRecording(e) {
-    console.log("Recording Stopped");
-    this.releaseMediaDevice();
-    this.zone.run(() => {
-      this.isPreviewReordingBtnDisabled = false;
-      this.isRecordingBtnDisabled = true;
-      this.isResetBtnDisabled = false;
-      this.isUploadBtnDisabled = false;
-    });
-
-  }
-
-  releaseMediaDevice() {
-    let tracks = this.mediaRecorder?.stream?.getTracks() || [];
-    if (tracks.length > 0) {
-      tracks.forEach(track => {
-        track?.stop();
-      });
-    }
-  }
-
-
-  startRecording() {
-    this.mediaRecorder.start();
-  }
-
-  stopRecording() {
-    this.mediaRecorder.stop();
-  }
-
 
   onOpenCameraClick(event: Event) {
-    this.init();
+    this.mediaRecorderService.init();
+    this.passStreamSubscription = this.mediaRecorderService.passStreamToVideoElement.subscribe( stream => {
+      this.passStreamSubscription.unsubscribe();
+      if(stream){
+        this.videoElement.nativeElement.srcObject = stream;
+      }
+    });
     this.showPreWebcamTemplate = false;
     this.isRecordingBtnDisabled = false;
     this.isPreviewReordingBtnDisabled = true;
@@ -117,16 +60,26 @@ export class AddVideoLogComponent implements OnDestroy {
   onRecordingClick(buttonText: string) {
     if (buttonText === "Start Recording") {
       this.recordingBtnText = "Stop Recording";
-      this.startRecording();
+      this.mediaRecorderService.startRecording();
     } else {
-      this.stopRecording();
+      this.mediaRecorderService.stopRecording();
+
+      this.updateViewOnStopRecordingSubscription = this.mediaRecorderService.updateViewOnStopRecording.subscribe( data => {
+        this.updateViewOnStopRecordingSubscription.unsubscribe();
+        if(data){
+          this.zone.run(() => {
+            this.isPreviewReordingBtnDisabled = false;
+            this.isRecordingBtnDisabled = true;
+            this.isResetBtnDisabled = false;
+            this.isUploadBtnDisabled = false;
+          });
+        }
+      });
     }
   }
 
   onPreviewClick(event: Event) {
-    let videoBlobPreview: Blob;
-    videoBlobPreview = new Blob(this.chunk);
-    this.videoBlobObjectUrl = window.URL.createObjectURL(videoBlobPreview);
+    this.videoBlobObjectUrl = this.mediaRecorderService.videoBlobObjectUrl();
 
     //Dynamic component load
     const componentFactoryRef = this.componentFactoryResolver.resolveComponentFactory(PreviewRecordingComponent);
@@ -153,7 +106,7 @@ export class AddVideoLogComponent implements OnDestroy {
     this.isUploadBtnDisabled = true;
     this.isRecordingBtnDisabled = true;
     this.showPreWebcamTemplate = true;
-    this.chunk = [];
+    this.mediaRecorderService.resetChunk();
   }
 
 }
